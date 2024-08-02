@@ -22,7 +22,7 @@ class MLP(nn.Module):
         self.layers = nn.ModuleList(modules)
 
     def forward(self, X):
-        print('X.shape:', X.shape)
+        # print('X.shape:', X.shape)
         X = X.transpose(2, 1)
         for i, fc in enumerate(self.layers):
             if i != 0:
@@ -60,7 +60,7 @@ class cMLP(nn.Module):
         Args:
           X: torch tensor of shape (batch, T, p).
         '''
-        print('X.shape:', X.shape)
+        # print('X.shape:', X.shape)
         return torch.cat([network(X) for network in self.networks], dim=2)
 
     def GC(self, threshold=True, ignore_lag=True):
