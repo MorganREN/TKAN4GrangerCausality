@@ -83,31 +83,29 @@ def simulate_lorenz_96(p, T, F=10.0, delta_t=0.1, sd=0.1, burn_in=1000,
 
 # Zexuan's method
 
-total_length=1000
-
 def sigmoid(x):
         return 1 / (1 + math.exp(-x))
     
-def generate_ds1(sig_to_noise): 
+def generate_ds1(total_length, variance=0.01): 
     np.random.seed(0)
-    z = [1,1,1,1]
-    x=[1,1,1,1]
+    z = [4,1,2,1]
+    x=[2,4,1,3]
     #y=[3,3,3,3]
     p = []
     n = [3,3,3,3]
-    y_cg = [3,3,3,3]
-    y_ncg = [3,3,3,3]
+    y_gc = [3,3,3,3]
+    y_ngc = [3,3,3,3]
     for i in range(4,total_length+4):
-        z.append(math.tanh(z[i-1]+np.random.normal(0,0.01)))
+        z.append(math.tanh(z[i-1]+np.random.normal(0,variance)))
         p.append(z[i]**2+np.random.normal(0,0.05))
-        x.append(sigmoid(z[i-2])+np.random.normal(0,0.01))
+        x.append(math.sin(x[i-1])+np.random.normal(0,variance))
     
         term1 = sigmoid(z[i-4])
-        term2 = sigmoid(x[i-2])
+        term2 = sigmoid(x[i-4])
         # term1 = z[i-4]*z[i-3]
-        # term2 = x[i-2]*x[i-1]
-        y_cg.append(term1 + term2 + np.random.normal(0,0.01))
-        y_ncg.append(term1 + np.random.normal(0,0.01))
+        # term2 = x[i-2]*x[i-1] 
+        y_gc.append(term1 + term2 + np.random.normal(0,variance))
+        y_ngc.append(term1 + np.random.normal(0,variance))
         n.append(np.random.normal(0,1))
         #noise = np.random.normal(0,1)
         #alpha = (abs(term1+term2)/sig_to_noise)/abs(noise)
@@ -116,8 +114,8 @@ def generate_ds1(sig_to_noise):
     x=x[-total_length:]
     p=p[-total_length:]
     z=z[-total_length:]
-    y_cg=y_cg[-total_length:]
-    y_ncg=y_ncg[-total_length:]
+    y_gc=y_gc[-total_length:]
+    y_ngc=y_ngc[-total_length:]
     # df=pd.DataFrame({"x":x,"y":y,"p":p,"z":z})
-    df = pd.DataFrame({'z': z, 'u': p, 'x': x, 'y_ncg': y_ncg, 'y_cg': y_cg})
+    df = pd.DataFrame({'z': z, 'u': p, 'x': x, 'y_ngc': y_ngc, 'y_gc': y_gc})
     return df
