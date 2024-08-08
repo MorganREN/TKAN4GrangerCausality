@@ -58,6 +58,7 @@ class cKAN(nn.Module):
         output = []
         for i in range(self.p):
             scores = self.networks[i].node_scores[0].view(self.p, self.lag).sum(dim=1).detach().numpy()
+            scores = scores / scores.sum()
             output.append(scores)
 
         output = np.array(output)
@@ -98,7 +99,7 @@ def create_dataset(X, Y, device='cpu'):
     return dataset
 
 
-def train_model_ckan(ckan, array, max_iter=20, opt='LBFGS', lamb=0.001, device='cpu'):
+def train_model_ckan(ckan, array, max_iter=20, opt='LBFGS', lamb=0.001, device='cpu', reg_metric='node_backward'):
     '''
     train the ckan model
 
@@ -120,9 +121,13 @@ def train_model_ckan(ckan, array, max_iter=20, opt='LBFGS', lamb=0.001, device='
     train_loss_list = []
 
     for i in range(num_series):
-        Y = array[:, :, i][0, :T-lag].reshape(1, T-lag).T
+        Y = array[:, :, i][0, lag:].reshape(1, T-lag).T
         dataset = create_dataset(X, Y, device)
-        loss_list = ckan.networks[i].fit(dataset, opt=opt, steps=max_iter, lamb=lamb)
+        loss_list = ckan.networks[i].fit(dataset, 
+                                         opt=opt, 
+                                         steps=max_iter, 
+                                         lamb=lamb,
+                                         reg_metric=reg_metric)
         train_loss_list.append(loss_list['train_loss'])
         # print(loss_list)
 
